@@ -4,13 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,6 +39,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainContent() {
+    val diceValue1 = remember { mutableStateOf(6) }
+    val diceValue2 = remember { mutableStateOf(6) }
+    val hasRolled = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
     DiceGameComposeTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -48,28 +53,63 @@ fun MainContent() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val diceValue1 = remember { mutableStateOf(6) }
-                val diceValue2 = remember { mutableStateOf(6)}
                 Text("Player", modifier = Modifier.padding(10.dp))
-                DieCast(
-                    diceValue1.value,
-                    onClick = { diceValue1.value = rollDice() }
-                )
+                DieCast(diceValue1.value)
                 Divider(
                     modifier = Modifier.padding(start = 30.dp, end = 30.dp),
                     thickness = 1.dp,
                     color = Color.Black
                 )
                 Text("Computer", modifier = Modifier.padding(10.dp))
-                DieCast(
-                    diceValue2.value,
-                    onClick = { diceValue2.value = rollDice() }
-                )
+                DieCast(diceValue2.value)
+                Button(
+                    onClick = {
+                        diceValue1.value = rollDice()
+                        diceValue2.value = rollDice()
+                        showDialog.value = true
+                    }
+                ) {
+                    Text(text = "ROLL!")
+                }
+                if (showDialog.value) {
+                    println(hasRolled.value)
+                    ShowRollResult(
+                        value1 = diceValue1.value,
+                        value2 = diceValue2.value,
+                        onDismiss = {showDialog.value = false}
+                    )
+                    hasRolled.value = false
+                }
 
             }
 
         }
     }
+}
+
+@Composable
+fun ShowRollResult(value1: Int, value2: Int, onDismiss: () -> Unit) {
+    val winText: String = when {
+        value1 > value2 -> "Player 1 wins!"
+        value1 < value2 -> "Player 2 wins!"
+        else -> "Draw"
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text ="Result") },
+        text = { Text(winText) },
+        confirmButton = {
+            Button(
+                onClick = onDismiss
+            ) {
+                Text("OK")
+            }
+
+        }
+    )
+
+
 }
 
 @Preview(showBackground = true)
@@ -81,7 +121,7 @@ fun MainContentPreview() {
 }
 
 @Composable
-fun DieCast(n: Int, onClick: () -> Unit) {
+fun DieCast(n: Int) {
     val drawableRes = when (n) {
         1 -> R.drawable.dice_1
         2 -> R.drawable.dice_2
@@ -96,7 +136,6 @@ fun DieCast(n: Int, onClick: () -> Unit) {
         painter = painterResource(id = drawableRes),
         contentDescription = "Dice Game!",
         modifier = Modifier
-            .clickable { onClick() }
             .size(300.dp)
     )
 }
