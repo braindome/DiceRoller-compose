@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.dicegamecompose.ui.theme.AppTheme
 import com.example.dicegamecompose.ui.theme.DiceGameComposeTheme
 import kotlin.random.Random
 
@@ -43,7 +44,7 @@ fun MainContent() {
     val diceValue2 = remember { mutableStateOf(6) }
     val hasRolled = remember { mutableStateOf(false) }
     val showDialog = remember { mutableStateOf(false) }
-    DiceGameComposeTheme {
+    AppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
